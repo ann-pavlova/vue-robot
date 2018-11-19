@@ -66,17 +66,6 @@
 
     export default {
         name: "RobotBuilder",
-        created() {
-          this.$store.dispatch('getParts');
-        },
-        beforeRouteLeave(to, from, next) {
-            if (this.addedToCard) {
-                next(true)
-            } else {
-                const response = confirm('You are not added you robot to card');
-                next(response);
-            }
-        },
         components: {PartSelector, CollapsibleSection},
         data() {
             return {
@@ -91,7 +80,17 @@
                 }
             };
         },
-        mixins: [createdHookMixin],
+        created() {
+          this.$store.dispatch('robots/getParts');
+        },
+        beforeRouteLeave(to, from, next) {
+            if (this.addedToCard) {
+                next(true);
+            } else {
+                const response = confirm('You are not added you robot to card');
+                next(response);
+            }
+        },
         computed: {
             headBorderStyle() {
                 return {
@@ -102,17 +101,19 @@
                 return this.selectRobot.head.onSale ? 'sale-border' : ''
             },
             availableParts() {
-                return this.$store.state.parts;
+                return this.$store.state.robots.parts;
             }
         },
         methods: {
             addToCard() {
                 const robot = this.selectRobot;
                 const cost = robot.head.cost + robot.leftArm.cost + robot.torso.cost + robot.rightArm.cost + robot.base.cost;
-                this.$store.dispatch('addToCard', Object.assign({}, robot, {cost}));
+                this.$store.dispatch('robots/addToCard', Object.assign({}, robot, {cost}))
+                    .then(() => this.$router.push('/cart'));
                 this.addedToCard = true;
             }
-        }
+        },
+        mixins: [createdHookMixin]
     }
 </script>
 
